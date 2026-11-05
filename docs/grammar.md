@@ -10,6 +10,7 @@
 This document defines the syntax accepted by the MVP parser and the AST shape produced from it. It is intentionally a subset of LOLCODE 1.3. It does not define runtime execution.
 
 The parser consumes tokens from `token-specification.md`. It must:
+
 - validate program structure and statement syntax;
 - construct an AST with source spans;
 - report syntax errors with useful locations;
@@ -17,29 +18,30 @@ The parser consumes tokens from `token-specification.md`. It must:
 
 ## 2. MVP syntax coverage
 
-| Construct | Status |
-|---|---|
-| `HAI 1.3` program header | Supported |
-| `KTHXBYE` program terminator | Supported |
-| Variable declaration: `I HAS A` | Supported |
+| Construct                              | Status    |
+| -------------------------------------- | --------- |
+| `HAI 1.3` program header               | Supported |
+| `KTHXBYE` program terminator           | Supported |
+| Variable declaration: `I HAS A`        | Supported |
 | Optional initializer: `ITZ expression` | Supported |
-| Assignment: `variable R expression` | Supported |
-| `VISIBLE` output | Supported |
-| `GIMMEH` input | Supported |
-| Literals and identifiers | Supported |
-| Prefix arithmetic operators | Supported |
-| Prefix boolean operators | Supported |
-| Equality / inequality | Supported |
+| Assignment: `variable R expression`    | Supported |
+| `VISIBLE` output                       | Supported |
+| `GIMMEH` input                         | Supported |
+| Literals and identifiers               | Supported |
+| Prefix arithmetic operators            | Supported |
+| Prefix boolean operators               | Supported |
+| Equality / inequality                  | Supported |
 | `O RLY?` / `YA RLY` / `NO WAI` / `OIC` | Supported |
-| `MEBBE` branches | Deferred |
-| `WTF?` switch | Deferred |
-| Loops and functions | Deferred |
-| `SMOOSH`, casts, `SRS`, interpolation | Deferred |
-| Ellipsis continuation | Deferred |
+| `MEBBE` branches                       | Deferred  |
+| `WTF?` switch                          | Deferred  |
+| Loops and functions                    | Deferred  |
+| `SMOOSH`, casts, `SRS`, interpolation  | Deferred  |
+| Ellipsis continuation                  | Deferred  |
 
 ## 3. Grammar notation
 
 The grammar uses EBNF:
+
 - `A = B, C ;` means sequence.
 - `A = B | C ;` means alternatives.
 - `[ A ]` means optional.
@@ -65,6 +67,7 @@ separator
 ```
 
 Parser requirements:
+
 - `HAI` and `KTHXBYE` are mandatory.
 - MVP version token must be `1.3`.
 - The header must be followed by at least one separator.
@@ -150,6 +153,7 @@ VISIBLE SUM OF 2 AN PRODUKT OF 3 AN 4
 ### 6.1 Expression boundary rule
 
 Because prefix operators do not use parentheses in the MVP, the parser must parse operator arity:
+
 - `NOT` consumes exactly one expression.
 - Binary operators consume a left expression, `AN`, and a right expression.
 - A literal or identifier consumes one expression.
@@ -174,6 +178,7 @@ conditional_statement
 ```
 
 Rules:
+
 - The condition is the current value of implicit `IT`; no condition expression follows `O RLY?`.
 - `YA RLY` is mandatory.
 - `NO WAI` is optional.
@@ -300,10 +305,18 @@ export interface UnaryExpressionNode {
 export interface BinaryExpressionNode {
   kind: "BinaryExpression";
   operator:
-    | "SUM_OF" | "DIFF_OF" | "PRODUKT_OF" | "QUOSHUNT_OF"
-    | "MOD_OF" | "BIGGR_OF" | "SMALLR_OF"
-    | "BOTH_OF" | "EITHER_OF" | "WON_OF"
-    | "BOTH_SAEM" | "DIFFRINT";
+    | "SUM_OF"
+    | "DIFF_OF"
+    | "PRODUKT_OF"
+    | "QUOSHUNT_OF"
+    | "MOD_OF"
+    | "BIGGR_OF"
+    | "SMALLR_OF"
+    | "BOTH_OF"
+    | "EITHER_OF"
+    | "WON_OF"
+    | "BOTH_SAEM"
+    | "DIFFRINT";
   left: ExpressionNode;
   right: ExpressionNode;
   span: SourceSpan;
@@ -314,20 +327,21 @@ If a parser error prevents construction of a normal node, an optional `ErrorExpr
 
 ## 9. Parser diagnostics and recovery
 
-| Code | Name | Trigger |
-|---|---|---|
-| `SYN001` | Missing program start | First significant token is not `HAI` |
-| `SYN002` | Missing version | `HAI` is not followed by `1.3` |
-| `SYN003` | Missing program end | EOF before `KTHXBYE` |
-| `SYN004` | Expected identifier | Declaration, assignment, or input target is missing |
-| `SYN005` | Expected expression | Operator or statement requires an expression |
-| `SYN006` | Expected `AN` | Binary prefix operator lacks `AN` |
-| `SYN007` | Expected block marker | Conditional lacks `YA RLY` or `OIC` |
-| `SYN008` | Unexpected token | Token cannot appear at the current grammar position |
-| `SYN009` | Unsupported syntax | A deferred construct is encountered |
-| `SYN010` | Empty output | `VISIBLE` has no expression |
+| Code     | Name                  | Trigger                                             |
+| -------- | --------------------- | --------------------------------------------------- |
+| `SYN001` | Missing program start | First significant token is not `HAI`                |
+| `SYN002` | Missing version       | `HAI` is not followed by `1.3`                      |
+| `SYN003` | Missing program end   | EOF before `KTHXBYE`                                |
+| `SYN004` | Expected identifier   | Declaration, assignment, or input target is missing |
+| `SYN005` | Expected expression   | Operator or statement requires an expression        |
+| `SYN006` | Expected `AN`         | Binary prefix operator lacks `AN`                   |
+| `SYN007` | Expected block marker | Conditional lacks `YA RLY` or `OIC`                 |
+| `SYN008` | Unexpected token      | Token cannot appear at the current grammar position |
+| `SYN009` | Unsupported syntax    | A deferred construct is encountered                 |
+| `SYN010` | Empty output          | `VISIBLE` has no expression                         |
 
 Recovery strategy:
+
 - At top level, synchronize at `NEWLINE`, `COMMA`, `KTHXBYE`, or a recognized block marker.
 - Inside a conditional, synchronize at `YA_RLY`, `NO_WAI`, or `OIC`.
 - Do not consume `KTHXBYE` during recovery unless it is being parsed as the terminator.

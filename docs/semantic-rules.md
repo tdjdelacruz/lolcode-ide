@@ -13,43 +13,38 @@ The IDE does not execute programs. The analyzer infers types and reports issues;
 
 ## 2. MVP semantic scope
 
-| Feature | Status | Notes |
-|---|---|---|
-| Variable declaration and duplicate detection | Supported | Single program scope in MVP |
-| Undeclared variable detection | Supported | Includes reads and writes |
-| Dynamic variable types | Supported | Type may change after assignment |
-| `NOOB` initialization | Supported | Declaration without initializer is NOOB |
-| `IT` tracking | Supported | Updated by expression statements, not assignments |
-| Arithmetic operand validation | Supported | Numeric operands required |
-| Boolean operand validation | Supported | TROOF operands required |
-| Comparison validation | Supported | Apply rules below |
-| Conditional `O RLY?` | Supported | Uses inferred type/value category of `IT` |
-| Definite assignment analysis | Basic | Warn when a NOOB-initialized variable is read where a concrete value is expected |
-| Function scopes, loop scopes | Deferred | Constructs are not in MVP grammar |
-| Runtime input values | Not analyzed | `GIMMEH` is not executed |
+| Feature                                      | Status       | Notes                                                                            |
+| -------------------------------------------- | ------------ | -------------------------------------------------------------------------------- |
+| Variable declaration and duplicate detection | Supported    | Single program scope in MVP                                                      |
+| Undeclared variable detection                | Supported    | Includes reads and writes                                                        |
+| Dynamic variable types                       | Supported    | Type may change after assignment                                                 |
+| `NOOB` initialization                        | Supported    | Declaration without initializer is NOOB                                          |
+| `IT` tracking                                | Supported    | Updated by expression statements, not assignments                                |
+| Arithmetic operand validation                | Supported    | Numeric operands required                                                        |
+| Boolean operand validation                   | Supported    | TROOF operands required                                                          |
+| Comparison validation                        | Supported    | Apply rules below                                                                |
+| Conditional `O RLY?`                         | Supported    | Uses inferred type/value category of `IT`                                        |
+| Definite assignment analysis                 | Basic        | Warn when a NOOB-initialized variable is read where a concrete value is expected |
+| Function scopes, loop scopes                 | Deferred     | Constructs are not in MVP grammar                                                |
+| Runtime input values                         | Not analyzed | `GIMMEH` is not executed                                                         |
 
 ## 3. Type model
 
 ```ts
 export type LolType =
-  | "NUMBR"
-  | "NUMBAR"
-  | "YARN"
-  | "TROOF"
-  | "NOOB"
-  | "UNKNOWN";
+  "NUMBR" | "NUMBAR" | "YARN" | "TROOF" | "NOOB" | "UNKNOWN";
 ```
 
 `UNKNOWN` is an analyzer-internal type used after an error or when inference is not possible. It is not a LOLCODE runtime type.
 
-| Type | Meaning |
-|---|---|
-| `NUMBR` | Integer numeric value |
-| `NUMBAR` | Floating-point numeric value |
-| `YARN` | String value |
-| `TROOF` | Boolean value (`WIN` / `FAIL`) |
-| `NOOB` | Uninitialized / null-like value |
-| `UNKNOWN` | Internal recovery type |
+| Type      | Meaning                         |
+| --------- | ------------------------------- |
+| `NUMBR`   | Integer numeric value           |
+| `NUMBAR`  | Floating-point numeric value    |
+| `YARN`    | String value                    |
+| `TROOF`   | Boolean value (`WIN` / `FAIL`)  |
+| `NOOB`    | Uninitialized / null-like value |
+| `UNKNOWN` | Internal recovery type          |
 
 ## 4. Symbol table and scope
 
@@ -70,6 +65,7 @@ export interface Scope {
 ```
 
 Rules:
+
 1. A variable declaration adds a symbol to the current scope.
 2. A second declaration of the same name in the same scope is an error.
 3. Identifier reads must resolve to a previously declared symbol.
@@ -99,6 +95,7 @@ Expected inferred types: `count: NUMBR`, `title: YARN`, `ready: TROOF`, `pending
 ### 5.2 Assignment
 
 `name R expression`:
+
 - requires `name` to have been declared;
 - infers the right-hand expression type;
 - updates the variable's current inferred type to that type (dynamic typing);
@@ -118,6 +115,7 @@ This is a deliberate MVP semantic rule aligned with LOLCODE's dynamic typing mod
 `IT` is a special implicit temporary value.
 
 MVP rules:
+
 1. `IT` begins as `NOOB`.
 2. An expression statement updates `IT` to the inferred type of that expression.
 3. An assignment statement does not update `IT`.
@@ -131,13 +129,13 @@ The MVP grammar currently permits expressions as operands within statements but 
 
 ### 7.1 Literals
 
-| AST expression | Inferred type |
-|---|---|
-| integer literal | `NUMBR` |
-| decimal literal | `NUMBAR` |
-| string literal | `YARN` |
-| `WIN`, `FAIL` | `TROOF` |
-| `NOOB` | `NOOB` |
+| AST expression  | Inferred type |
+| --------------- | ------------- |
+| integer literal | `NUMBR`       |
+| decimal literal | `NUMBAR`      |
+| string literal  | `YARN`        |
+| `WIN`, `FAIL`   | `TROOF`       |
+| `NOOB`          | `NOOB`        |
 
 Identifier references use the symbol's current inferred type. `IT` uses the current implicit `IT` type.
 
@@ -146,6 +144,7 @@ Identifier references use the symbol's current inferred type. `IT` uses the curr
 Operators: `SUM OF`, `DIFF OF`, `PRODUKT OF`, `QUOSHUNT OF`, `MOD OF`, `BIGGR OF`, `SMALLR OF`.
 
 MVP static rule:
+
 - both operands must be `NUMBR` or `NUMBAR`;
 - if either operand is `NUMBAR`, result type is `NUMBAR`;
 - otherwise result type is `NUMBR`;
@@ -156,12 +155,12 @@ These are analyzer typing rules, not an execution engine. The implementation sho
 
 ### 7.3 Boolean operators
 
-| Operator | Arity | Operand requirements | Result |
-|---|---:|---|---|
-| `BOTH OF` | 2 | `TROOF`, `TROOF` | `TROOF` |
-| `EITHER OF` | 2 | `TROOF`, `TROOF` | `TROOF` |
-| `WON OF` | 2 | `TROOF`, `TROOF` | `TROOF` |
-| `NOT` | 1 | `TROOF` | `TROOF` |
+| Operator    | Arity | Operand requirements | Result  |
+| ----------- | ----: | -------------------- | ------- |
+| `BOTH OF`   |     2 | `TROOF`, `TROOF`     | `TROOF` |
+| `EITHER OF` |     2 | `TROOF`, `TROOF`     | `TROOF` |
+| `WON OF`    |     2 | `TROOF`, `TROOF`     | `TROOF` |
+| `NOT`       |     1 | `TROOF`              | `TROOF` |
 
 ### 7.4 Comparisons
 
@@ -192,6 +191,7 @@ This is a conservative MVP rule. If exact LOLCODE 1.3 coercion behavior is imple
 ## 9. Conditional semantics
 
 `O RLY?` uses implicit `IT`:
+
 - If `IT` is `TROOF`, the conditional is valid.
 - For other known types, emit a type diagnostic or warning according to the selected MVP policy. Recommended default: warning for non-`TROOF` values because LOLCODE has truthiness behavior; document the exact truthiness model if it is implemented.
 - If `IT` is `UNKNOWN`, avoid cascading diagnostics.
@@ -200,19 +200,20 @@ This is a conservative MVP rule. If exact LOLCODE 1.3 coercion behavior is imple
 
 ## 10. Diagnostics
 
-| Code | Name | Severity | Trigger |
-|---|---|---|---|
-| `SEM001` | Undeclared variable | Error | Read or assignment target not declared |
-| `SEM002` | Duplicate declaration | Error | Same variable declared twice in one scope |
-| `SEM003` | Invalid operand type | Error | Operator receives unsupported type |
-| `SEM004` | Invalid comparison | Error | Comparison operands are incompatible under MVP rules |
-| `SEM005` | Invalid conditional type | Warning | `IT` has a known non-TROOF type at `O RLY?` |
-| `SEM006` | Uninitialized variable read | Warning | Variable is read before receiving a non-NOOB value |
-| `SEM007` | Division by zero | Error | `QUOSHUNT OF` has a statically known literal zero divisor |
-| `SEM008` | Invalid input target | Error | `GIMMEH` target is undeclared |
-| `SEM009` | Unsupported semantic feature | Warning/Error | Deferred feature reaches semantic analysis |
+| Code     | Name                         | Severity      | Trigger                                                   |
+| -------- | ---------------------------- | ------------- | --------------------------------------------------------- |
+| `SEM001` | Undeclared variable          | Error         | Read or assignment target not declared                    |
+| `SEM002` | Duplicate declaration        | Error         | Same variable declared twice in one scope                 |
+| `SEM003` | Invalid operand type         | Error         | Operator receives unsupported type                        |
+| `SEM004` | Invalid comparison           | Error         | Comparison operands are incompatible under MVP rules      |
+| `SEM005` | Invalid conditional type     | Warning       | `IT` has a known non-TROOF type at `O RLY?`               |
+| `SEM006` | Uninitialized variable read  | Warning       | Variable is read before receiving a non-NOOB value        |
+| `SEM007` | Division by zero             | Error         | `QUOSHUNT OF` has a statically known literal zero divisor |
+| `SEM008` | Invalid input target         | Error         | `GIMMEH` target is undeclared                             |
+| `SEM009` | Unsupported semantic feature | Warning/Error | Deferred feature reaches semantic analysis                |
 
 Each diagnostic must include:
+
 - stable code;
 - severity (`error`, `warning`, or `info`);
 - concise message;
