@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "prettier": "npx prettier . --write",
     "test-code": "npx tsx packages/language-core/samples/test-code.ts",
-    "run-tests": "npx vitest run packages/language-core/tests/lexer packages/language-core/tests/parser packages/language-core/tests/semantic"
+    "run-tests": "npx vitest run packages/language-core/tests/"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
