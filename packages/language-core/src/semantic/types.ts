@@ -1,4 +1,5 @@
-export type SemanticType = "NUMBR" | "NUMBAR" | "YARN" | "TROOF" | "NOOB" | "UNKNOWN";
+export type SemanticType =
+  "NUMBR" | "NUMBAR" | "YARN" | "TROOF" | "NOOB" | "UNKNOWN";
 
 export interface SymbolInfo {
   name: string;

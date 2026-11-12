@@ -39,8 +39,13 @@ export class SemanticAnalyzer {
     switch (statement.kind) {
       case "VariableDeclaration": {
         if (this.symbols.has(statement.name)) {
-          this.report("SEM001", `Variable '${statement.name}' is already declared.`, statement.span);
-          if (statement.initializer) this.inferExpression(statement.initializer);
+          this.report(
+            "SEM001",
+            `Variable '${statement.name}' is already declared.`,
+            statement.span,
+          );
+          if (statement.initializer)
+            this.inferExpression(statement.initializer);
           return;
         }
 
@@ -60,7 +65,11 @@ export class SemanticAnalyzer {
         const symbol = this.symbols.get(statement.name);
         const valueType = this.inferExpression(statement.value);
         if (!symbol) {
-          this.report("SEM004", `Cannot assign to undeclared variable '${statement.name}'.`, statement.span);
+          this.report(
+            "SEM004",
+            `Cannot assign to undeclared variable '${statement.name}'.`,
+            statement.span,
+          );
           return;
         }
         symbol.type = valueType;
@@ -75,7 +84,11 @@ export class SemanticAnalyzer {
       case "Input": {
         const symbol = this.symbols.get(statement.name);
         if (!symbol) {
-          this.report("SEM002", `Input target '${statement.name}' has not been declared.`, statement.span);
+          this.report(
+            "SEM002",
+            `Input target '${statement.name}' has not been declared.`,
+            statement.span,
+          );
           return;
         }
         // Input is text from the user's perspective; its value is a YARN.
@@ -126,7 +139,8 @@ export class SemanticAnalyzer {
       const elseValue = elseSymbols.get(name);
       if (!thenValue || !elseValue) continue;
       original.initialized = thenValue.initialized && elseValue.initialized;
-      original.type = thenValue.type === elseValue.type ? thenValue.type : "UNKNOWN";
+      original.type =
+        thenValue.type === elseValue.type ? thenValue.type : "UNKNOWN";
     }
     this.itType = beforeItType;
     this.itInitialized = beforeItInitialized;
@@ -147,25 +161,41 @@ export class SemanticAnalyzer {
       case "Identifier": {
         const symbol = this.symbols.get(expression.name);
         if (!symbol) {
-          this.report("SEM002", `Variable '${expression.name}' has not been declared.`, expression.span);
+          this.report(
+            "SEM002",
+            `Variable '${expression.name}' has not been declared.`,
+            expression.span,
+          );
           return "UNKNOWN";
         }
         if (!symbol.initialized) {
-          this.report("SEM003", `Variable '${expression.name}' is used before it is initialized.`, expression.span);
+          this.report(
+            "SEM003",
+            `Variable '${expression.name}' is used before it is initialized.`,
+            expression.span,
+          );
           return "UNKNOWN";
         }
         return symbol.type;
       }
       case "ItReference":
         if (!this.itInitialized) {
-          this.report("SEM008", "IT is read before it has received a value.", expression.span);
+          this.report(
+            "SEM008",
+            "IT is read before it has received a value.",
+            expression.span,
+          );
           return "UNKNOWN";
         }
         return this.itType;
       case "UnaryExpression": {
         const operandType = this.inferExpression(expression.operand);
         if (operandType !== "TROOF" && operandType !== "UNKNOWN") {
-          this.report("SEM006", `NOT expects TROOF; received ${operandType}.`, expression.span);
+          this.report(
+            "SEM006",
+            `NOT expects TROOF; received ${operandType}.`,
+            expression.span,
+          );
           return "UNKNOWN";
         }
         return "TROOF";
@@ -175,7 +205,9 @@ export class SemanticAnalyzer {
     }
   }
 
-  private inferBinaryExpression(expression: BinaryExpressionNode): SemanticType {
+  private inferBinaryExpression(
+    expression: BinaryExpressionNode,
+  ): SemanticType {
     const left = this.inferExpression(expression.left);
     const right = this.inferExpression(expression.right);
     if (left === "UNKNOWN" || right === "UNKNOWN") return "UNKNOWN";
@@ -189,10 +221,16 @@ export class SemanticAnalyzer {
       case "BIGGR_OF":
       case "SMALLR_OF": {
         if (!this.isNumeric(left) || !this.isNumeric(right)) {
-          this.report("SEM005", `${expression.operator} expects NUMBR or NUMBAR operands; received ${left} and ${right}.`, expression.span);
+          this.report(
+            "SEM005",
+            `${expression.operator} expects NUMBR or NUMBAR operands; received ${left} and ${right}.`,
+            expression.span,
+          );
           return "UNKNOWN";
         }
-        return expression.operator === "QUOSHUNT_OF" || left === "NUMBAR" || right === "NUMBAR"
+        return expression.operator === "QUOSHUNT_OF" ||
+          left === "NUMBAR" ||
+          right === "NUMBAR"
           ? "NUMBAR"
           : "NUMBR";
       }
@@ -200,18 +238,33 @@ export class SemanticAnalyzer {
       case "EITHER_OF":
       case "WON_OF":
         if (left !== "TROOF" || right !== "TROOF") {
-          this.report("SEM006", `${expression.operator} expects TROOF operands; received ${left} and ${right}.`, expression.span);
+          this.report(
+            "SEM006",
+            `${expression.operator} expects TROOF operands; received ${left} and ${right}.`,
+            expression.span,
+          );
           return "UNKNOWN";
         }
         return "TROOF";
       case "BOTH_SAEM":
       case "DIFFRINT":
         if (left === "NOOB" || right === "NOOB") {
-          this.report("SEM009", `${expression.operator} cannot compare NOOB values in this language subset.`, expression.span);
+          this.report(
+            "SEM009",
+            `${expression.operator} cannot compare NOOB values in this language subset.`,
+            expression.span,
+          );
           return "UNKNOWN";
         }
-        if (left !== right && !(this.isNumeric(left) && this.isNumeric(right))) {
-          this.report("SEM007", `${expression.operator} compares compatible types; received ${left} and ${right}.`, expression.span);
+        if (
+          left !== right &&
+          !(this.isNumeric(left) && this.isNumeric(right))
+        ) {
+          this.report(
+            "SEM007",
+            `${expression.operator} compares compatible types; received ${left} and ${right}.`,
+            expression.span,
+          );
           return "UNKNOWN";
         }
         return "TROOF";
@@ -222,7 +275,11 @@ export class SemanticAnalyzer {
     return type === "NUMBR" || type === "NUMBAR";
   }
 
-  private report(code: SemanticDiagnosticCode, message: string, span: SourceSpan): void {
+  private report(
+    code: SemanticDiagnosticCode,
+    message: string,
+    span: SourceSpan,
+  ): void {
     this.diagnostics.push({ code, severity: "error", message, span });
   }
 

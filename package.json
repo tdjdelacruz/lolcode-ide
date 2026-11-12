@@ -10,10 +10,12 @@
     "preview": "vite preview",
     "prettier": "npx prettier . --write",
     "test-code": "npx tsx packages/language-core/samples/test-code.ts",
-    "run-tests": "npx vitest run packages/language-core/tests/"
+    "run-tests": "npx vitest run packages/language-core/tests/",
+    "start:ui": "npm run dev -w apps/web"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "lucide-react": "^1.72.0",
     "monaco-editor": "^0.57.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
